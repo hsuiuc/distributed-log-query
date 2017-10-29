@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -24,12 +25,16 @@ public class MyClient {
 
     private List<Socket> connect() {
         List<Future<Socket>> socketFutures = new ArrayList<Future<Socket>>();
-        for (int i = 0; i < NUM_CONNECTIONS; i++) {
-            int serverPort = 3000 + i;
-            Callable<Socket> socketToServerTask = createSocketToServerTask(serverPort);
-            Future<Socket> socketFuture = executorService.submit(socketToServerTask);
-            socketFutures.add(socketFuture);
-        }
+//        for (int i = 0; i < NUM_CONNECTIONS; i++) {
+//            int serverPort = 3000 + i;
+//            Callable<Socket> socketToServerTask = createSocketToServerTask(serverPort);
+//            Future<Socket> socketFuture = executorService.submit(socketToServerTask);
+//            socketFutures.add(socketFuture);
+//        }
+        String serverAddr = "192.168.0.26";
+        Callable<Socket> socketToServerTask = createSocketToServerTask(serverAddr);
+        Future<Socket> socketFutureTask = executorService.submit(socketToServerTask);
+        socketFutures.add(socketFutureTask);
 
         List<Socket> socketsToServers = new ArrayList<>();
         while (socketFutures.size() > 0) {
@@ -53,8 +58,8 @@ public class MyClient {
         return socketsToServers;
     }
 
-    private Callable<Socket> createSocketToServerTask(final int serverPort) {
-        return () -> new Socket(InetAddress.getLocalHost(), serverPort);
+    private Callable<Socket> createSocketToServerTask(String serverAddr) {
+        return () -> new Socket(InetAddress.getByName(serverAddr), 3000);
     }
 
     private void grep(List<Socket> socketsToServers) {
